@@ -8,7 +8,7 @@ export const analyzeShipment = async (
   description: string,
 ): Promise<AnalyzeShipmentResponse> => {
   const response = await axios.post<AnalyzeShipmentResponse>(
-    `${API_URL}/analyze`,
+    `${API_URL}/shipments/analyze`,
     { description },
   );
 
@@ -19,7 +19,7 @@ export const getShipments = async (): Promise<Shipment[]> => {
   const response = await axios.get<{
     success: boolean;
     shipments: Shipment[];
-  }>(API_URL);
+  }>(`${API_URL}/shipments`);
 
   return response.data.shipments;
 };
@@ -28,11 +28,11 @@ export const getShipmentById = async (id: string): Promise<Shipment> => {
   const response = await axios.get<{
     success: boolean;
     shipment: Shipment;
-  }>(`${API_URL}/${id}`);
+  }>(`${API_URL}/shipments/${id}`);
 
   return response.data.shipment;
 };
 
 export const deleteShipment = async (id: string): Promise<void> => {
-  await axios.delete(`${API_URL}/${id}`);
+  await axios.delete(`${API_URL}/shipments/${id}`);
 };
