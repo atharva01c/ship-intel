@@ -1,6 +1,6 @@
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { Globe } from "lucide-react";
-import { useCallback } from "react";
+
 
 const NAV_LINKS = [
   { label: "Dashboard", href: "/dashboard" },
@@ -8,19 +8,13 @@ const NAV_LINKS = [
   { label: "Shipments", href: "/shipments" },
 ];
 
-const preloadMap: Record<string, () => Promise<unknown>> = {
-  "/dashboard": () => import("../pages/Dashboard"),
-  "/analyze": () => import("../pages/AnalyzeShipment"),
-  "/shipments": () => import("../pages/ShipmentHistory"),
-};
+
 
 function Navbar() {
   const location = useLocation();
   const navigate = useNavigate();
 
-  const handleMouseEnter = useCallback((href: string) => {
-    preloadMap[href]?.();
-  }, []);
+
 
   return (
     <nav className="sticky top-0 z-20 px-6 py-4">
@@ -37,7 +31,7 @@ function Navbar() {
             <Link
               key={link.label}
               to={link.href}
-              onMouseEnter={() => handleMouseEnter(link.href)}
+
               onClick={(e) => {
                 e.preventDefault();
                 navigate(link.href);
