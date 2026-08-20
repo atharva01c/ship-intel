@@ -6,6 +6,31 @@
   --font-geist: "Geist", -apple-system, BlinkMacSystemFont, sans-serif;
 }
 
+:root {
+  /* Line + surface */
+  --border: rgba(255, 255, 255, 0.12);
+
+  /* Text emphasis: --text is the muted label, --text-h the value it labels */
+  --text: rgba(255, 255, 255, 0.5);
+  --text-h: rgba(255, 255, 255, 0.92);
+
+  /* Accent — matches the Normal-priority violet used across the tables */
+  --accent: #c084fc;
+  --accent-bg: rgba(192, 132, 252, 0.16);
+
+  /* Chrome heights, so pages can size themselves against the real viewport */
+  --nav-h: 4.5rem;
+  --dock-h: calc(4.5rem + env(safe-area-inset-bottom));
+}
+
+/* From md up the bottom dock is gone and the top bar is taller. */
+@media (min-width: 768px) {
+  :root {
+    --nav-h: 5.5rem;
+    --dock-h: 0px;
+  }
+}
+
 @layer components {
   .liquid-glass {
     background: rgba(255, 255, 255, 0.05);
@@ -45,6 +70,31 @@
     mask-composite: exclude;
     pointer-events: none;
   }
+
+  /* Fluid display scale — continuous, so headlines never jump at a breakpoint
+     or overflow the way a fixed text-7xl does. */
+  .display {
+    font-family: "Instrument Serif", serif;
+    font-weight: 400;
+    letter-spacing: -0.02em;
+    text-wrap: balance;
+  }
+
+  .display-hero {
+    font-size: clamp(2.75rem, 8.5vw, 5.5rem);
+    line-height: 0.95;
+  }
+
+  .display-page {
+    font-size: clamp(2.5rem, 7vw, 4.5rem);
+    line-height: 1;
+  }
+
+  /* Fills the viewport minus the chrome, using svh so mobile browser
+     toolbars don't push content out of frame the way 100vh does. */
+  .viewport-fit {
+    min-height: calc(100svh - var(--nav-h) - var(--dock-h));
+  }
 }
 
 * {
@@ -53,11 +103,16 @@
 
 body {
   margin: 0;
+  /* Clearance so the fixed mobile dock never covers the last card. */
+  padding-bottom: var(--dock-h);
   background: #000;
   color: #fff;
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  /* `clip` rather than `hidden`: it contains stray overflow without making
+     body a scroll container, which would break the sticky navbar. */
+  overflow-x: clip;
 }
 
 #root {
@@ -70,6 +125,12 @@ body {
   display: block;
 }
 
+/* Keyboard focus stays visible everywhere. */
+:focus-visible {
+  outline: 2px solid rgba(255, 255, 255, 0.7);
+  outline-offset: 2px;
+}
+
 /* Active press states — only buttons/links, not glass containers */
 button:active {
   transform: scale(0.95);
@@ -80,6 +141,12 @@ button:active {
 .liquid-glass > div > a:active {
   transform: scale(0.95);
   transition: transform 80ms ease-out;
+}
+
+/* Nav tabs shouldn't shrink on tap — they're fixed slots, not buttons. */
+nav .liquid-glass > a:active,
+nav .liquid-glass > div > a:active {
+  transform: none;
 }
 
 /* Disable all animations for reduced-motion users */

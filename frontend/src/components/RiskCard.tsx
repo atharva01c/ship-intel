@@ -1,97 +1,51 @@
 import type { Shipment } from "../types/shipment";
+import { riskColor } from "../lib/shipmentColors";
 
 interface RiskCardProps {
   riskLevel: Shipment["riskLevel"];
   riskScore: number;
 }
 
-const riskColor: Record<Shipment["riskLevel"], string> = {
-  Low: "#22c55e",
-  Medium: "#f59e0b",
-  High: "#f97316",
-  Critical: "#ef4444",
-};
-
 function RiskCard({ riskLevel, riskScore }: RiskCardProps) {
   const color = riskColor[riskLevel];
+  const pct = Math.min(Math.max(riskScore, 0), 100);
 
   return (
-    <div style={styles.card}>
-      <div style={styles.header}>
-        <h2 style={styles.title}>Risk Assessment</h2>
-        <span style={{ ...styles.badge, color, borderColor: color }}>
+    <div className="text-left">
+      <div className="mb-4 flex items-center justify-between gap-3">
+        <h2 className="m-0 text-base font-medium text-white sm:text-lg">
+          Risk Assessment
+        </h2>
+        <span
+          className="shrink-0 rounded border px-2.5 py-0.5 text-xs font-semibold sm:text-[13px]"
+          style={{ color, borderColor: color }}
+        >
           {riskLevel}
         </span>
       </div>
 
-      <div style={styles.scoreRow}>
-        <span style={styles.scoreValue}>{riskScore}</span>
-        <span style={styles.scoreMax}>/ 100</span>
+      <div className="mb-2.5 flex items-baseline gap-1">
+        <span className="text-3xl font-bold text-[var(--text-h)] sm:text-4xl">
+          {riskScore}
+        </span>
+        <span className="text-sm text-[var(--text)]">/ 100</span>
       </div>
 
-      <div style={styles.track}>
+      <div
+        className="h-2 overflow-hidden rounded-full bg-[var(--border)]"
+        role="meter"
+        aria-valuenow={pct}
+        aria-valuemin={0}
+        aria-valuemax={100}
+        aria-label={`Risk score ${riskScore} of 100, ${riskLevel}`}
+      >
         <div
-          style={{
-            ...styles.fill,
-            width: `${Math.min(Math.max(riskScore, 0), 100)}%`,
-            backgroundColor: color,
-          }}
+          className="h-full rounded-full transition-[width] duration-300 ease-out"
+          style={{ width: `${pct}%`, backgroundColor: color }}
         />
       </div>
     </div>
   );
 }
-
-const styles: Record<string, React.CSSProperties> = {
-  card: {
-    border: "1px solid var(--border)",
-    borderRadius: 8,
-    padding: 24,
-    textAlign: "left",
-  },
-  header: {
-    display: "flex",
-    justifyContent: "space-between",
-    alignItems: "center",
-    marginBottom: 16,
-  },
-  title: {
-    margin: 0,
-    fontSize: 18,
-  },
-  badge: {
-    fontSize: 13,
-    fontWeight: 600,
-    border: "1px solid",
-    borderRadius: 4,
-    padding: "2px 10px",
-  },
-  scoreRow: {
-    display: "flex",
-    alignItems: "baseline",
-    gap: 4,
-    marginBottom: 10,
-  },
-  scoreValue: {
-    fontSize: 32,
-    fontWeight: 700,
-    color: "var(--text-h)",
-  },
-  scoreMax: {
-    fontSize: 14,
-    color: "var(--text)",
-  },
-  track: {
-    height: 8,
-    borderRadius: 4,
-    backgroundColor: "var(--border)",
-    overflow: "hidden",
-  },
-  fill: {
-    height: "100%",
-    borderRadius: 4,
-    transition: "width 0.3s ease",
-  },
-};
 
 export default RiskCard;

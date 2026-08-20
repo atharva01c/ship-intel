@@ -4,21 +4,8 @@ import axios from "axios";
 
 import { getShipments, deleteShipment } from "../services/shipmentApi";
 import type { Shipment } from "../types/shipment";
-
-
-const riskColor: Record<Shipment["riskLevel"], string> = {
-  Low: "#22c55e",
-  Medium: "#f59e0b",
-  High: "#f97316",
-  Critical: "#ef4444",
-};
-
-const priorityColor: Record<Shipment["priority"], string> = {
-  Low: "rgba(255,255,255,0.4)",
-  Normal: "#c084fc",
-  High: "#f59e0b",
-  Urgent: "#ef4444",
-};
+import { riskColor, priorityColor } from "../lib/shipmentColors";
+import ShipmentCard from "../components/ShipmentCard";
 
 function ShipmentHistory() {
   const [shipments, setShipments] = useState<Shipment[]>([]);
@@ -64,24 +51,19 @@ function ShipmentHistory() {
 
   if (loading) {
     return (
-      <div className="flex min-h-screen items-center justify-center">
+      <div className="viewport-fit flex items-center justify-center px-5">
         <p className="text-white/60">Loading shipments…</p>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen">
-      <main className="mx-auto max-w-6xl px-6 py-12">
+    <div>
+      <main className="mx-auto max-w-6xl px-5 py-8 sm:px-6 sm:py-12">
         {/* Header */}
-        <div className="mb-12">
-          <h1
-            className="text-5xl font-normal tracking-tight text-white md:text-6xl lg:text-7xl"
-            style={{ fontFamily: "'Instrument Serif', serif" }}
-          >
-            Shipments
-          </h1>
-          <p className="mt-4 text-white/50">
+        <div className="mb-8 sm:mb-12">
+          <h1 className="display display-page text-white">Shipments</h1>
+          <p className="mt-3 text-sm text-white/50 sm:mt-4 sm:text-base">
             All analyzed shipments in one place.
           </p>
         </div>
@@ -93,34 +75,42 @@ function ShipmentHistory() {
         )}
 
         {shipments.length === 0 ? (
-          <div
-            className="liquid-glass rounded-3xl p-12 text-center"
-          >
-            <p className="text-lg text-white/60">No shipments yet.</p>
+          <div className="liquid-glass rounded-3xl px-6 py-12 text-center sm:p-12">
+            <p className="text-base text-white/60 sm:text-lg">
+              No shipments yet.
+            </p>
             <Link
               to="/analyze"
-              className="mt-4 inline-flex items-center gap-2 text-sm text-white/80 underline transition-colors hover:text-white"
+              className="mt-4 inline-flex min-h-11 items-center gap-2 text-sm text-white/80 underline transition-colors hover:text-white"
             >
               Analyze your first shipment
             </Link>
           </div>
         ) : (
-          <div
-            className="liquid-glass rounded-3xl p-6"
-          >
-            <div className="overflow-x-auto">
+          /* One glass panel at every width — cards inside it on phones,
+             the full table from md up. */
+          <div className="liquid-glass rounded-3xl p-4 sm:p-6">
+            {/* Phones: stacked cards, every column intact, no sideways scroll. */}
+            <ul className="grid list-none gap-3 p-0 md:hidden">
+              {shipments.map((s) => (
+                <ShipmentCard
+                  key={s._id}
+                  shipment={s}
+                  onDelete={handleDelete}
+                />
+              ))}
+            </ul>
+
+            {/* md and up: the full table. */}
+            <div className="hidden md:block">
               <table className="w-full text-left text-sm">
                 <thead>
                   <tr className="border-b border-white/10 text-white/40">
                     <th className="pb-3 pr-4 font-medium">Route</th>
                     <th className="pb-3 pr-4 font-medium">Cargo</th>
-                    <th className="hidden pb-3 pr-4 font-medium sm:table-cell">
-                      Weight
-                    </th>
+                    <th className="pb-3 pr-4 font-medium">Weight</th>
                     <th className="pb-3 pr-4 font-medium">Risk</th>
-                    <th className="hidden pb-3 pr-4 font-medium sm:table-cell">
-                      Priority
-                    </th>
+                    <th className="pb-3 pr-4 font-medium">Priority</th>
                     <th className="pb-3 font-medium">Actions</th>
                   </tr>
                 </thead>
@@ -139,7 +129,7 @@ function ShipmentHistory() {
                         <td className="py-4 pr-4 text-white/70">
                           {cargoType || "—"}
                         </td>
-                        <td className="hidden py-4 pr-4 text-white/70 sm:table-cell">
+                        <td className="py-4 pr-4 text-white/70">
                           {weight !== null ? `${weight} kg` : "—"}
                         </td>
                         <td className="py-4 pr-4">
@@ -152,12 +142,14 @@ function ShipmentHistory() {
                           >
                             <span
                               className="h-1.5 w-1.5 rounded-full"
-                              style={{ backgroundColor: riskColor[s.riskLevel] }}
+                              style={{
+                                backgroundColor: riskColor[s.riskLevel],
+                              }}
                             />
                             {s.riskLevel}
                           </span>
                         </td>
-                        <td className="hidden py-4 pr-4 sm:table-cell">
+                        <td className="py-4 pr-4">
                           <span
                             className="text-xs font-medium"
                             style={{ color: priorityColor[s.priority] }}

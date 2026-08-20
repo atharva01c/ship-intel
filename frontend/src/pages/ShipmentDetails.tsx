@@ -65,7 +65,7 @@ function ShipmentDetails() {
 
   if (loading) {
     return (
-      <div className="flex min-h-screen items-center justify-center">
+      <div className="viewport-fit flex items-center justify-center px-5">
         <p className="text-white/60">Loading shipment…</p>
       </div>
     );
@@ -73,13 +73,13 @@ function ShipmentDetails() {
 
   if (error) {
     return (
-      <div className="min-h-screen bg-black">
-        <main className="mx-auto max-w-6xl px-6 py-12">
-          <div className="liquid-glass rounded-3xl p-12 text-center">
-            <p className="text-lg text-red-400">{error}</p>
+      <div>
+        <main className="mx-auto max-w-6xl px-5 py-8 sm:px-6 sm:py-12">
+          <div className="liquid-glass rounded-3xl px-6 py-12 text-center sm:p-12">
+            <p className="text-base text-red-400 sm:text-lg">{error}</p>
             <Link
               to="/shipments"
-              className="mt-4 inline-flex items-center gap-2 text-sm text-white/80 underline transition-colors hover:text-white"
+              className="mt-4 inline-flex min-h-11 items-center gap-2 text-sm text-white/80 underline transition-colors hover:text-white"
             >
               Back to Shipments
             </Link>
@@ -91,13 +91,15 @@ function ShipmentDetails() {
 
   if (!shipment) {
     return (
-      <div className="min-h-screen bg-black">
-        <main className="mx-auto max-w-6xl px-6 py-12">
-          <div className="liquid-glass rounded-3xl p-12 text-center">
-            <p className="text-lg text-white/60">Shipment not found.</p>
+      <div>
+        <main className="mx-auto max-w-6xl px-5 py-8 sm:px-6 sm:py-12">
+          <div className="liquid-glass rounded-3xl px-6 py-12 text-center sm:p-12">
+            <p className="text-base text-white/60 sm:text-lg">
+              Shipment not found.
+            </p>
             <Link
               to="/shipments"
-              className="mt-4 inline-flex items-center gap-2 text-sm text-white/80 underline transition-colors hover:text-white"
+              className="mt-4 inline-flex min-h-11 items-center gap-2 text-sm text-white/80 underline transition-colors hover:text-white"
             >
               Back to Shipments
             </Link>
@@ -108,73 +110,59 @@ function ShipmentDetails() {
   }
 
   return (
-    <div className="min-h-screen">
-      <main className="mx-auto max-w-6xl px-6 py-12">
+    <div>
+      <main className="mx-auto max-w-6xl px-5 py-8 sm:px-6 sm:py-12">
         {/* Header */}
-        <div className="mb-12 flex flex-col gap-6 sm:flex-row sm:items-end sm:justify-between">
-          <div>
+        <div className="mb-8 flex flex-col gap-5 sm:mb-12 sm:flex-row sm:items-end sm:justify-between sm:gap-6">
+          <div className="min-w-0">
             <Link
               to="/shipments"
-              className="mb-4 inline-flex items-center gap-1 text-sm text-white/50 transition-colors hover:text-white"
+              className="mb-3 inline-flex min-h-11 items-center gap-1 text-sm text-white/50 transition-colors hover:text-white sm:mb-4 sm:min-h-0"
             >
               ← Back to Shipments
             </Link>
-            <h1
-              className="text-4xl font-normal tracking-tight text-white md:text-5xl lg:text-6xl"
-              style={{ fontFamily: "'Instrument Serif', serif" }}
-            >
+            <h1 className="display display-page text-white">
               Shipment Details
             </h1>
-            <p className="mt-2 text-sm text-white/40">
+            {/* break-all: a 24-char ObjectId has no break opportunities and
+                will otherwise push the layout wider than the screen. */}
+            <p className="mt-2 break-all text-xs text-white/40 sm:text-sm">
               Shipment ID: {shipment._id}
             </p>
           </div>
           <button
             onClick={handleDelete}
-            className="self-start rounded-full border border-red-500/30 px-5 py-2 text-sm font-medium text-red-400 transition-colors hover:bg-red-500/10"
+            className="flex min-h-11 shrink-0 items-center justify-center self-stretch rounded-full border border-red-500/30 px-5 text-sm font-medium text-red-400 transition-colors hover:bg-red-500/10 sm:self-start"
           >
             Delete Shipment
           </button>
         </div>
 
-        {/* Bento grid */}
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-          {/* Overview card */}
-          <div
-            className="liquid-glass rounded-3xl p-6"
-          >
+        {/* Bento grid — pairs up at lg, where the label/value rows have
+            enough width to read as two columns. */}
+        <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+          <div className="liquid-glass rounded-3xl p-5 sm:p-6">
             <ShipmentOverview shipment={shipment} />
           </div>
 
-          {/* Risk card */}
-          <div
-            className="liquid-glass rounded-3xl p-6"
-          >
+          <div className="liquid-glass rounded-3xl p-5 sm:p-6">
             <RiskCard
               riskLevel={shipment.riskLevel}
               riskScore={shipment.riskScore}
             />
           </div>
 
-          {/* Alerts card */}
-          <div
-            className="liquid-glass rounded-3xl p-6"
-          >
+          <div className="liquid-glass rounded-3xl p-5 sm:p-6">
             <AlertList alerts={shipment.alerts} />
           </div>
 
-          {/* Recommendations card */}
-          <div
-            className="liquid-glass rounded-3xl p-6"
-          >
+          <div className="liquid-glass rounded-3xl p-5 sm:p-6">
             <RecommendationList recommendations={shipment.recommendations} />
           </div>
         </div>
 
         {/* Original description */}
-        <div
-          className="liquid-glass mt-4 rounded-3xl p-6"
-        >
+        <div className="liquid-glass mt-4 rounded-3xl p-5 sm:p-6">
           <h2 className="mb-3 text-xs font-medium uppercase tracking-widest text-white/40">
             Original Description
           </h2>

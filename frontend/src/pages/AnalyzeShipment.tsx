@@ -71,17 +71,12 @@ function AnalyzeShipment() {
     }
   };
   return (
-    <div className="min-h-screen">
-      <main className="mx-auto max-w-3xl px-6 py-12">
+    <div>
+      <main className="mx-auto max-w-3xl px-5 py-8 sm:px-6 sm:py-12">
         {/* Header */}
-        <div className="mb-12">
-          <h1
-            className="text-5xl font-normal tracking-tight text-white md:text-6xl lg:text-7xl"
-            style={{ fontFamily: "'Instrument Serif', serif" }}
-          >
-            Analyze
-          </h1>
-          <p className="mt-4 text-white/50">
+        <div className="mb-8 sm:mb-12">
+          <h1 className="display display-page text-white">Analyze</h1>
+          <p className="mt-3 text-sm text-white/50 sm:mt-4 sm:text-base">
             Describe your shipment and get AI-powered risk analysis.
           </p>
         </div>
@@ -91,7 +86,7 @@ function AnalyzeShipment() {
           <div
           >
             <form onSubmit={handleSubmit}>
-              <div className="liquid-glass rounded-3xl p-6 md:p-8">
+              <div className="liquid-glass rounded-3xl p-5 sm:p-6 md:p-8">
                 <label
                   htmlFor="shipment-desc"
                   className="mb-3 block text-xs font-medium uppercase tracking-widest text-white/40"
@@ -104,12 +99,14 @@ function AnalyzeShipment() {
                   onChange={(e) => setDescription(e.target.value)}
                   placeholder="Describe your shipment… e.g. 'Fragile electronics from Shanghai to Rotterdam, 500kg, needs temperature control'"
                   rows={5}
-                  className="w-full resize-none rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-white placeholder-white/30 outline-none transition-colors focus:border-white/30 focus:ring-1 focus:ring-white/20"
+                  className="w-full resize-none rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-base text-white placeholder-white/30 outline-none transition-colors focus:border-white/30 focus:ring-1 focus:ring-white/20 sm:text-sm"
                 />
 
                 {error && <p className="mt-3 text-sm text-red-400">{error}</p>}
 
-                <div className="mt-4 flex items-center justify-between">
+                {/* Stacks on phones — the helper text and the button collide
+                    when they share a row at narrow widths. */}
+                <div className="mt-4 flex flex-col-reverse gap-3 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
                   <p className="text-xs text-white/30">
                     AI analyzes risk, alerts, and provides smart
                     recommendations.
@@ -117,7 +114,7 @@ function AnalyzeShipment() {
                   <button
                     type="submit"
                     disabled={loading}
-                    className="flex items-center gap-2 rounded-full px-6 py-2.5 text-sm font-medium text-white transition-all hover:bg-white/10 disabled:cursor-not-allowed disabled:opacity-50"
+                    className="flex min-h-12 shrink-0 items-center justify-center gap-2 rounded-full bg-white/5 px-6 text-sm font-medium text-white transition-all hover:bg-white/10 disabled:cursor-not-allowed disabled:opacity-50 sm:min-h-0 sm:bg-transparent sm:py-2.5"
                   >
                     {loading ? (
                       <>
@@ -139,15 +136,14 @@ function AnalyzeShipment() {
 
         {/* Results */}
         {shipment && (
-          <div
-            className="mt-8 grid gap-4"
-          >
-            {/* Top row: Overview + Risk */}
-            <div className="grid gap-4 sm:grid-cols-2">
-              <div className="liquid-glass rounded-3xl p-6">
+          <div className="mt-8 grid gap-4">
+            {/* Top row: Overview + Risk. Pairs up at lg, not sm — the
+                label/value rows need real width to stay readable. */}
+            <div className="grid gap-4 lg:grid-cols-2">
+              <div className="liquid-glass rounded-3xl p-5 sm:p-6">
                 <ShipmentOverview shipment={shipment} />
               </div>
-              <div className="liquid-glass rounded-3xl p-6">
+              <div className="liquid-glass rounded-3xl p-5 sm:p-6">
                 <RiskCard
                   riskLevel={shipment.riskLevel}
                   riskScore={shipment.riskScore}
@@ -156,11 +152,11 @@ function AnalyzeShipment() {
             </div>
 
             {/* Bottom row: Alerts + Recommendations */}
-            <div className="grid gap-4 sm:grid-cols-2">
-              <div className="liquid-glass rounded-3xl p-6">
+            <div className="grid gap-4 lg:grid-cols-2">
+              <div className="liquid-glass rounded-3xl p-5 sm:p-6">
                 <AlertList alerts={shipment.alerts} />
               </div>
-              <div className="liquid-glass rounded-3xl p-6">
+              <div className="liquid-glass rounded-3xl p-5 sm:p-6">
                 <RecommendationList
                   recommendations={shipment.recommendations}
                 />
@@ -175,13 +171,13 @@ function AnalyzeShipment() {
                   setDescription("");
                   setError("");
                 }}
-                className="liquid-glass flex-1 rounded-full px-6 py-4 text-sm font-medium text-white/80 transition-colors hover:text-white"
+                className="liquid-glass min-h-14 flex-1 rounded-full px-6 text-sm font-medium text-white/80 transition-colors hover:text-white"
               >
                 Analyze Another Shipment
               </button>
               <Link
                 to={`/shipments/${shipment._id}`}
-                className="liquid-glass group flex flex-1 items-center justify-center gap-2 rounded-full px-6 py-4 text-sm font-medium text-white/80 transition-colors hover:text-white"
+                className="liquid-glass group flex min-h-14 flex-1 items-center justify-center gap-2 rounded-full px-6 text-sm font-medium text-white/80 transition-colors hover:text-white"
               >
                 View Full Details
                 <ArrowUpRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />

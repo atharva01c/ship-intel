@@ -5,20 +5,8 @@ import { Package, TrendingUp, Clock, ArrowUpRight } from "lucide-react";
 
 import { getShipments } from "../services/shipmentApi";
 import type { Shipment } from "../types/shipment";
-
-const riskColor: Record<Shipment["riskLevel"], string> = {
-  Low: "#22c55e",
-  Medium: "#f59e0b",
-  High: "#f97316",
-  Critical: "#ef4444",
-};
-
-const priorityColor: Record<Shipment["priority"], string> = {
-  Low: "rgba(255,255,255,0.4)",
-  Normal: "#c084fc",
-  High: "#f59e0b",
-  Urgent: "#ef4444",
-};
+import { riskColor, priorityColor } from "../lib/shipmentColors";
+import ShipmentCard from "../components/ShipmentCard";
 
 function Dashboard() {
   const [shipments, setShipments] = useState<Shipment[]>([]);
@@ -59,24 +47,19 @@ function Dashboard() {
 
   if (loading) {
     return (
-      <div className="flex min-h-screen items-center justify-center">
+      <div className="viewport-fit flex items-center justify-center px-5">
         <p className="text-white/60">Loading dashboard…</p>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen">
-      <main className="mx-auto max-w-6xl px-6 py-12">
+    <div>
+      <main className="mx-auto max-w-6xl px-5 py-8 sm:px-6 sm:py-12">
         {/* Header */}
-        <div className="mb-12">
-          <h1
-            className="text-5xl font-normal tracking-tight text-white md:text-6xl lg:text-7xl"
-            style={{ fontFamily: "'Instrument Serif', serif" }}
-          >
-            Dashboard
-          </h1>
-          <p className="mt-4 text-white/50">
+        <div className="mb-8 sm:mb-12">
+          <h1 className="display display-page text-white">Dashboard</h1>
+          <p className="mt-3 text-sm text-white/50 sm:mt-4 sm:text-base">
             Real-time overview of your shipment monitoring activity.
           </p>
         </div>
@@ -90,14 +73,14 @@ function Dashboard() {
         {/* Bento grid */}
         <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
           {/* Stats row - spans full width */}
-          <div className="liquid-glass rounded-3xl p-6 md:col-span-2">
+          <div className="liquid-glass rounded-3xl p-5 sm:p-6 md:col-span-2">
             <div className="mb-4 flex items-center gap-2">
               <Package className="h-5 w-5 text-white/60" />
               <span className="text-xs font-medium uppercase tracking-widest text-white/40">
                 Overview
               </span>
             </div>
-            <div className="grid grid-cols-2 pl-1 pt-3 gap-7 sm:grid-cols-4">
+            <div className="grid grid-cols-2 gap-5 pt-2 sm:grid-cols-4 sm:gap-7 sm:pl-1 sm:pt-3">
               <StatBlock label="Total" value={totalShipments.toString()} />
               <StatBlock
                 label="High Risk"
@@ -113,7 +96,7 @@ function Dashboard() {
           </div>
 
           {/* Quick action card */}
-          <div className="liquid-glass group rounded-3xl p-6">
+          <div className="liquid-glass group rounded-3xl p-5 sm:p-6">
             <div className="mb-4 flex items-center gap-2">
               <TrendingUp className="h-5 w-5 text-white/60" />
               <span className="text-xs font-medium uppercase tracking-widest text-white/40">
@@ -128,25 +111,25 @@ function Dashboard() {
             </p>
             <Link
               to="/analyze"
-              className="inline-flex items-center gap-2 text-sm text-white/80 transition-colors hover:text-white"
+              className="inline-flex min-h-11 items-center gap-2 text-sm text-white/80 transition-colors hover:text-white sm:min-h-0"
             >
               Start Now
               <ArrowUpRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
             </Link>
           </div>
 
-          {/* Recent shipments table - spans full width */}
-          <div className="liquid-glass rounded-3xl p-6 md:col-span-3">
-            <div className="mb-6 flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <Clock className="h-5 w-5 text-white/60" />
-                <span className="text-xs font-medium uppercase tracking-widest text-white/40">
+          {/* Recent shipments - spans full width */}
+          <div className="liquid-glass rounded-3xl p-5 sm:p-6 md:col-span-3">
+            <div className="mb-5 flex items-center justify-between gap-3 sm:mb-6">
+              <div className="flex min-w-0 items-center gap-2">
+                <Clock className="h-5 w-5 shrink-0 text-white/60" />
+                <span className="truncate text-xs font-medium uppercase tracking-widest text-white/40">
                   Recent Shipments
                 </span>
               </div>
               <Link
                 to="/shipments"
-                className="text-sm text-white/60 transition-colors hover:text-white"
+                className="shrink-0 text-sm text-white/60 transition-colors hover:text-white"
               >
                 View All
               </Link>
@@ -163,79 +146,85 @@ function Dashboard() {
                 </Link>
               </p>
             ) : (
-              <div className="overflow-x-auto">
-                <table className="w-full text-left text-sm">
-                  <thead>
-                    <tr className="border-b border-white/10 text-white/40">
-                      <th className="pb-3 pr-4 font-medium">Route</th>
-                      <th className="pb-3 pr-4 font-medium">Cargo</th>
-                      <th className="hidden pb-3 pr-4 font-medium sm:table-cell">
-                        Weight
-                      </th>
-                      <th className="pb-3 pr-4 font-medium">Risk</th>
-                      <th className="hidden pb-3 pr-4 font-medium sm:table-cell">
-                        Priority
-                      </th>
-                      <th className="pb-3 font-medium">Action</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {recentShipments.map((s) => {
-                      const { origin, destination, cargoType, weight } =
-                        s.shipmentDetails;
-                      return (
-                        <tr
-                          key={s._id}
-                          className="border-b border-white/5 transition-colors hover:bg-white/5"
-                        >
-                          <td className="py-3 pr-4">
-                            {origin || "—"} → {destination || "—"}
-                          </td>
-                          <td className="py-3 pr-4 text-white/70">
-                            {cargoType || "—"}
-                          </td>
-                          <td className="hidden py-3 pr-4 text-white/70 sm:table-cell">
-                            {weight !== null ? `${weight} kg` : "—"}
-                          </td>
-                          <td className="py-3 pr-4">
-                            <span
-                              className="inline-flex items-center gap-1.5 rounded-full px-2 py-0.5 text-xs font-medium"
-                              style={{
-                                backgroundColor: `${riskColor[s.riskLevel]}20`,
-                                color: riskColor[s.riskLevel],
-                              }}
-                            >
+              <>
+                {/* Phones: stacked cards, every column intact, no sideways scroll. */}
+                <ul className="grid list-none gap-3 p-0 md:hidden">
+                  {recentShipments.map((s) => (
+                    <ShipmentCard key={s._id} shipment={s} />
+                  ))}
+                </ul>
+
+                {/* md and up: the full table. */}
+                <div className="hidden md:block">
+                  <table className="w-full text-left text-sm">
+                    <thead>
+                      <tr className="border-b border-white/10 text-white/40">
+                        <th className="pb-3 pr-4 font-medium">Route</th>
+                        <th className="pb-3 pr-4 font-medium">Cargo</th>
+                        <th className="pb-3 pr-4 font-medium">Weight</th>
+                        <th className="pb-3 pr-4 font-medium">Risk</th>
+                        <th className="pb-3 pr-4 font-medium">Priority</th>
+                        <th className="pb-3 font-medium">Action</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {recentShipments.map((s) => {
+                        const { origin, destination, cargoType, weight } =
+                          s.shipmentDetails;
+                        return (
+                          <tr
+                            key={s._id}
+                            className="border-b border-white/5 transition-colors hover:bg-white/5"
+                          >
+                            <td className="py-3 pr-4">
+                              {origin || "—"} → {destination || "—"}
+                            </td>
+                            <td className="py-3 pr-4 text-white/70">
+                              {cargoType || "—"}
+                            </td>
+                            <td className="py-3 pr-4 text-white/70">
+                              {weight !== null ? `${weight} kg` : "—"}
+                            </td>
+                            <td className="py-3 pr-4">
                               <span
-                                className="h-1.5 w-1.5 rounded-full"
+                                className="inline-flex items-center gap-1.5 rounded-full px-2 py-0.5 text-xs font-medium"
                                 style={{
-                                  backgroundColor: riskColor[s.riskLevel],
+                                  backgroundColor: `${riskColor[s.riskLevel]}20`,
+                                  color: riskColor[s.riskLevel],
                                 }}
-                              />
-                              {s.riskLevel}
-                            </span>
-                          </td>
-                          <td className="hidden py-3 pr-4 sm:table-cell">
-                            <span
-                              className="text-xs font-medium"
-                              style={{ color: priorityColor[s.priority] }}
-                            >
-                              {s.priority}
-                            </span>
-                          </td>
-                          <td className="py-3">
-                            <Link
-                              to={`/shipments/${s._id}`}
-                              className="text-sm text-white/60 transition-colors hover:text-white"
-                            >
-                              View
-                            </Link>
-                          </td>
-                        </tr>
-                      );
-                    })}
-                  </tbody>
-                </table>
-              </div>
+                              >
+                                <span
+                                  className="h-1.5 w-1.5 rounded-full"
+                                  style={{
+                                    backgroundColor: riskColor[s.riskLevel],
+                                  }}
+                                />
+                                {s.riskLevel}
+                              </span>
+                            </td>
+                            <td className="py-3 pr-4">
+                              <span
+                                className="text-xs font-medium"
+                                style={{ color: priorityColor[s.priority] }}
+                              >
+                                {s.priority}
+                              </span>
+                            </td>
+                            <td className="py-3">
+                              <Link
+                                to={`/shipments/${s._id}`}
+                                className="text-sm text-white/60 transition-colors hover:text-white"
+                              >
+                                View
+                              </Link>
+                            </td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                </div>
+              </>
             )}
           </div>
         </div>
@@ -255,7 +244,7 @@ function StatBlock({
 }) {
   return (
     <div>
-      <p className="text-xs font-medium uppercase tracking-widest text-white/40">
+      <p className="text-[11px] font-medium uppercase tracking-widest text-white/40 sm:text-xs">
         {label}
       </p>
       <p
