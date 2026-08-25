@@ -1,23 +1,33 @@
 const axios = require("axios");
+const crypto = require("crypto");
+const { z } = require("zod");
 
-const analyzeShipment = async (description) => {
-  try {
-    const response = await axios.post(
-      "https://integrate.api.nvidia.com/v1/chat/completions",
-      {
-        model: process.env.NVIDIA_MODEL,
+const ShipmentSchema = z.object({
+  shipment_weight: z.number().nullable(),
+  delivery_days: z.number().nullable(),
+  origin: z.string().nullable(),
+  destination: z.string().nullable(),
+  product_type: z.string().nullable(),
+  special_requirements: z.array(z.string()),
+  recommendations: z.array(z.string()),
+});
 
-        messages: [
-          {
-            role: "system",
-            content: `
+const getNvidiaClient = () =>
+  axios.create({
+    baseURL: "https://integrate.api.nvidia.com/v1",
+    timeout: 30_000,
+    headers: {
+      Authorization: `Bearer ${process.env.NVIDIA_API_KEY}`,
+      "Content-Type": "application/json",
+    },
+  });
+
+const SYSTEM_PROMPT = `
 You are a logistics shipment intelligence assistant.
 
 Analyze the shipment description and extract relevant logistics information.
 
 Return ONLY valid JSON.
-Do not include markdown.
-Do not include explanations outside the JSON.
 
 Return exactly these fields:
 
@@ -32,42 +42,95 @@ Return exactly these fields:
 }
 
 Rules:
-
-1. Extract only information explicitly stated or reasonably implied by the shipment description.
-2. Use null when information is unavailable.
-3. Do not invent shipment information.
+1. Extract only explicitly stated or clearly implied information.
+2. Use null when unavailable.
+3. Never invent shipment information.
 4. Do not duplicate delivery deadlines inside special_requirements.
-5. special_requirements should only contain cargo-specific requirements such as temperature control, fragile handling, hazardous material handling, special packaging, etc.
-6. recommendations should contain practical logistics actions based on the shipment.
-7. Recommendations can consider delivery deadlines, shipment weight, cargo type, origin, destination, special requirements, customs, documentation, handling, and transportation planning.
-8. Return 2 to 5 useful recommendations when enough information is available.
-9. Do not provide recommendations unrelated to the shipment.
-`,
-          },
-          {
-            role: "user",
-            content: description,
-          },
-        ],
+5. special_requirements should contain cargo-specific requirements.
+6. recommendations should be practical logistics actions.
+7. Return 2 to 5 recommendations when sufficient information exists.
+`;
 
-        temperature: 0.2,
-        max_tokens: 1000,
-      },
-      {
-        headers: {
-          Authorization: `Bearer ${process.env.NVIDIA_API_KEY}`,
-          "Content-Type": "application/json",
+const validateDescription = (description) => {
+  if (typeof description !== "string") {
+    throw new Error("Description must be a string");
+  }
+
+  const value = description.trim();
+
+  if (!value) {
+    throw new Error("Description cannot be empty");
+  }
+
+  if (value.length > 10_000) {
+    throw new Error("Description is too long");
+  }
+
+  return value;
+};
+
+const analyzeShipment = async (description) => {
+  const requestId = crypto.randomUUID();
+
+  const input = validateDescription(description);
+
+  try {
+    const response = await getNvidiaClient().post("/chat/completions", {
+      model: process.env.NVIDIA_MODEL,
+
+      messages: [
+        {
+          role: "system",
+          content: SYSTEM_PROMPT,
         },
-      },
-    );
+        {
+          role: "user",
+          content: input,
+        },
+      ],
 
-    const content = response.data.choices[0].message.content;
+      temperature: 0.2,
+      max_tokens: 700,
+    });
 
-    const parsedResult = JSON.parse(content);
+    const content = response.data?.choices?.[0]?.message?.content;
 
-    return parsedResult;
+    if (!content) {
+      throw new Error("Empty AI response");
+    }
+
+    let parsed;
+
+    try {
+      // Strip markdown code fences that some models wrap around JSON
+      const cleaned = content
+        .replace(/^```(?:json)?\s*/i, "")
+        .replace(/```\s*$/i, "")
+        .trim();
+      parsed = JSON.parse(cleaned);
+    } catch {
+      throw new Error("AI returned invalid JSON");
+    }
+
+    const result = ShipmentSchema.safeParse(parsed);
+
+    if (!result.success) {
+      console.error({
+        requestId,
+        error: "Invalid AI response schema",
+      });
+
+      throw new Error("AI returned invalid shipment data");
+    }
+
+    return result.data;
   } catch (error) {
-    console.error("NVIDIA NIM error:", error.response?.data || error.message);
+    console.error({
+      requestId,
+      provider: "nvidia",
+      status: error.response?.status,
+      error: error.message,
+    });
 
     throw new Error("AI service failed");
   }
