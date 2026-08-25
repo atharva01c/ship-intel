@@ -9,6 +9,7 @@ import ShipmentOverview from "../components/ShipmentOverview";
 import RiskCard from "../components/RiskCard";
 import AlertList from "../components/AlertList";
 import RecommendationList from "../components/RecommendationList";
+import ShipmentReviewPanel from "../components/ShipmentReviewPanel";
 
 function AnalyzeShipment() {
   const [searchParams] = useSearchParams();
@@ -72,7 +73,7 @@ function AnalyzeShipment() {
   };
   return (
     <div>
-      <main className="mx-auto max-w-3xl px-5 py-8 sm:px-6 sm:py-12">
+      <main className="mx-auto max-w-6xl px-5 py-8 sm:px-6 sm:py-12">
         {/* Header */}
         <div className="mb-8 sm:mb-12">
           <h1 className="display display-page text-white">Analyze</h1>
@@ -83,8 +84,9 @@ function AnalyzeShipment() {
 
         {/* Input form */}
         {!shipment && (
-          <div
-          >
+          <div className="mx-auto max-w-3xl">
+            {/* Narrower than the results bento — a lone textarea stretched
+                across the full content width reads badly. */}
             <form onSubmit={handleSubmit}>
               <div className="liquid-glass rounded-3xl p-5 sm:p-6 md:p-8">
                 <label
@@ -134,28 +136,38 @@ function AnalyzeShipment() {
           </div>
         )}
 
-        {/* Results */}
+        {/* Results — same bento grid as the details page */}
         {shipment && (
-          <div className="mt-8 grid gap-4">
-            {/* Top row: Overview + Risk. Pairs up at lg, not sm — the
-                label/value rows need real width to stay readable. */}
-            <div className="grid gap-4 lg:grid-cols-2">
+          <div className="mt-8">
+            <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+              {/* Low-confidence extraction: hold risk results until the user
+                  verifies the extracted details. */}
+              {shipment.needsReview && (
+                <div className="lg:col-span-2">
+                  <ShipmentReviewPanel
+                    shipment={shipment}
+                    onReviewed={setShipment}
+                  />
+                </div>
+              )}
+
               <div className="liquid-glass rounded-3xl p-5 sm:p-6">
                 <ShipmentOverview shipment={shipment} />
               </div>
-              <div className="liquid-glass rounded-3xl p-5 sm:p-6">
-                <RiskCard
-                  riskLevel={shipment.riskLevel}
-                  riskScore={shipment.riskScore}
-                />
-              </div>
-            </div>
 
-            {/* Bottom row: Alerts + Recommendations */}
-            <div className="grid gap-4 lg:grid-cols-2">
+              {!shipment.needsReview && (
+                <div className="liquid-glass rounded-3xl p-5 sm:p-6">
+                  <RiskCard
+                    riskLevel={shipment.riskLevel}
+                    riskScore={shipment.riskScore}
+                  />
+                </div>
+              )}
+
               <div className="liquid-glass rounded-3xl p-5 sm:p-6">
                 <AlertList alerts={shipment.alerts} />
               </div>
+
               <div className="liquid-glass rounded-3xl p-5 sm:p-6">
                 <RecommendationList
                   recommendations={shipment.recommendations}
@@ -164,7 +176,7 @@ function AnalyzeShipment() {
             </div>
 
             {/* Actions */}
-            <div className="flex flex-col gap-3 sm:flex-row">
+            <div className="mt-4 flex flex-col gap-3 sm:flex-row">
               <button
                 onClick={() => {
                   setShipment(null);
@@ -175,13 +187,15 @@ function AnalyzeShipment() {
               >
                 Analyze Another Shipment
               </button>
-              <Link
-                to={`/shipments/${shipment._id}`}
-                className="liquid-glass group flex min-h-14 flex-1 items-center justify-center gap-2 rounded-full px-6 text-sm font-medium text-white/80 transition-colors hover:text-white"
-              >
-                View Full Details
-                <ArrowUpRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
-              </Link>
+              {!shipment.needsReview && (
+                <Link
+                  to={`/shipments/${shipment._id}`}
+                  className="liquid-glass group flex min-h-14 flex-1 items-center justify-center gap-2 rounded-full px-6 text-sm font-medium text-white/80 transition-colors hover:text-white"
+                >
+                  View Full Details
+                  <ArrowUpRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
+                </Link>
+              )}
             </div>
           </div>
         )}

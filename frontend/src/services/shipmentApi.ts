@@ -1,6 +1,11 @@
 import axios from "axios";
 
-import type { AnalyzeShipmentResponse, Shipment } from "../types/shipment";
+import type {
+  AnalyzeShipmentResponse,
+  Shipment,
+  ReviewShipmentPayload,
+  TimelineEventStatus,
+} from "../types/shipment";
 
 const API_URL = import.meta.env.VITE_API_URL;
 
@@ -35,4 +40,73 @@ export const getShipmentById = async (id: string): Promise<Shipment> => {
 
 export const deleteShipment = async (id: string): Promise<void> => {
   await axios.delete(`${API_URL}/shipments/${id}`);
+};
+
+export const reviewShipment = async (
+  id: string,
+  payload: ReviewShipmentPayload,
+): Promise<Shipment> => {
+  const response = await axios.patch<{
+    success: boolean;
+    message: string;
+    shipment: Shipment;
+  }>(`${API_URL}/shipments/${id}/review`, payload);
+
+  return response.data.shipment;
+};
+
+export interface AskShipmentResponse {
+  success: boolean;
+  answer: string;
+}
+
+export const askShipmentQuestion = async (
+  id: string,
+  question: string,
+): Promise<AskShipmentResponse> => {
+  const response = await axios.post<AskShipmentResponse>(
+    `${API_URL}/shipments/${id}/ask`,
+    { question },
+  );
+
+  return response.data;
+};
+
+const shipmentFromResponse = (data: { shipment: Shipment }) => data.shipment;
+
+export const updateTimelineEventStatus = async (
+  id: string,
+  eventId: string,
+  status: TimelineEventStatus,
+): Promise<Shipment> => {
+  const response = await axios.patch(
+    `${API_URL}/shipments/${id}/timeline/${eventId}`,
+    { status },
+  );
+
+  return shipmentFromResponse(response.data);
+};
+
+export const addTimelineEvent = async (
+  id: string,
+  label: string,
+  notes?: string,
+): Promise<Shipment> => {
+  const response = await axios.post(`${API_URL}/shipments/${id}/timeline`, {
+    label,
+    ...(notes ? { notes } : {}),
+  });
+
+  return shipmentFromResponse(response.data);
+};
+
+export const deleteTimelineEvent = async (
+  id: string,
+  eventId: string,
+): Promise<Shipment> => {
+  const response = await axios.delete(
+    `${API_URL}/shipments/${id}/timeline/${eventId}`,
+  );
+
+  return shipmentFromResponse(response.data);
 };

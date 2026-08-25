@@ -6,9 +6,17 @@ const shipmentRoutes = require("./routes/shipmentRoutes");
 const app = express();
 
 // Middleware
+// Allowlist: the configured frontend origin plus local dev origins, so a
+// missing/misconfigured FRONTEND_URL can't silently disable CORS.
+const allowedOrigins = [
+  process.env.FRONTEND_URL,
+  "http://localhost:5173",
+  "http://127.0.0.1:5173",
+].filter(Boolean);
+
 app.use(
   cors({
-    origin: process.env.FRONTEND_URL,
+    origin: allowedOrigins,
   }),
 );
 app.use(express.json());

@@ -9,6 +9,9 @@ import ShipmentOverview from "../components/ShipmentOverview";
 import RiskCard from "../components/RiskCard";
 import AlertList from "../components/AlertList";
 import RecommendationList from "../components/RecommendationList";
+import ShipmentReviewPanel from "../components/ShipmentReviewPanel";
+import ShipmentChat from "../components/ShipmentChat";
+import ShipmentTimeline from "../components/ShipmentTimeline";
 
 function ShipmentDetails() {
   const { id } = useParams<{ id: string }>();
@@ -61,6 +64,14 @@ function ShipmentDetails() {
       console.error(error);
       setError("Failed to delete shipment.");
     }
+  };
+
+  const handleReviewed = (updated: Shipment) => {
+    setShipment(updated);
+  };
+
+  const handleTimelineChange = (updated: Shipment) => {
+    setShipment(updated);
   };
 
   if (loading) {
@@ -141,16 +152,27 @@ function ShipmentDetails() {
         {/* Bento grid — pairs up at lg, where the label/value rows have
             enough width to read as two columns. */}
         <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+          {shipment.needsReview && (
+            <div className="lg:col-span-2">
+              <ShipmentReviewPanel
+                shipment={shipment}
+                onReviewed={handleReviewed}
+              />
+            </div>
+          )}
+
           <div className="liquid-glass rounded-3xl p-5 sm:p-6">
             <ShipmentOverview shipment={shipment} />
           </div>
 
-          <div className="liquid-glass rounded-3xl p-5 sm:p-6">
-            <RiskCard
-              riskLevel={shipment.riskLevel}
-              riskScore={shipment.riskScore}
-            />
-          </div>
+          {!shipment.needsReview && (
+            <div className="liquid-glass rounded-3xl p-5 sm:p-6">
+              <RiskCard
+                riskLevel={shipment.riskLevel}
+                riskScore={shipment.riskScore}
+              />
+            </div>
+          )}
 
           <div className="liquid-glass rounded-3xl p-5 sm:p-6">
             <AlertList alerts={shipment.alerts} />
@@ -159,6 +181,22 @@ function ShipmentDetails() {
           <div className="liquid-glass rounded-3xl p-5 sm:p-6">
             <RecommendationList recommendations={shipment.recommendations} />
           </div>
+        </div>
+
+        {/* Follow-up Q&A, scoped to this shipment */}
+        <div className="liquid-glass mt-4 rounded-3xl p-5 sm:p-6">
+          <ShipmentChat
+            shipmentId={shipment._id}
+            initialMessages={shipment.messages ?? []}
+          />
+        </div>
+
+        {/* Progress timeline */}
+        <div className="liquid-glass mt-4 rounded-3xl p-5 sm:p-6">
+          <ShipmentTimeline
+            shipment={shipment}
+            onShipmentChange={handleTimelineChange}
+          />
         </div>
 
         {/* Original description */}
