@@ -31,8 +31,10 @@ function RiskCard({ riskLevel, riskScore }: RiskCardProps) {
         <span className="text-sm text-[var(--text)]">/ 100</span>
       </div>
 
+      {/* scaleX rather than width: stays on the compositor (§ transform),
+          so the fill animates at full frame rate. */}
       <div
-        className="h-2 overflow-hidden rounded-full bg-[var(--border)]"
+        className="h-2 w-full overflow-hidden rounded-full bg-[var(--border)]"
         role="meter"
         aria-valuenow={pct}
         aria-valuemin={0}
@@ -40,8 +42,8 @@ function RiskCard({ riskLevel, riskScore }: RiskCardProps) {
         aria-label={`Risk score ${riskScore} of 100, ${riskLevel}`}
       >
         <div
-          className="h-full rounded-full transition-[width] duration-300 ease-out"
-          style={{ width: `${pct}%`, backgroundColor: color }}
+          className="h-full w-full origin-left rounded-full transition-transform duration-500 ease-out"
+          style={{ transform: `scaleX(${pct / 100})`, backgroundColor: color }}
         />
       </div>
     </div>

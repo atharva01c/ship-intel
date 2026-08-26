@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Navbar from "./components/Navbar";
+import ScrollToTop from "./components/ScrollToTop";
 
 import Landing from "./pages/Landing";
 import Dashboard from "./pages/Dashboard";
@@ -26,15 +27,36 @@ function usePrefersReducedMotion() {
   return reduced;
 }
 
+/** True when the browser reports Data Saver (Android / Chromium).
+    A looping background video is exactly what these users opted out of,
+    so they get the static gradient backdrop instead. */
+function useSaveDataHint() {
+  const [saveData, setSaveData] = useState(false);
+
+  useEffect(() => {
+    const connection = (
+      navigator as Navigator & { connection?: { saveData?: boolean } }
+    ).connection;
+    setSaveData(connection?.saveData ?? false);
+  }, []);
+
+  return saveData;
+}
+
 function App() {
   const reducedMotion = usePrefersReducedMotion();
+  const saveData = useSaveDataHint();
+  // One static backdrop serves both opt-outs — it's cheaper than the video
+  // and needs no motion or streaming to read correctly.
+  const useStaticBackdrop = reducedMotion || saveData;
 
   return (
     <BrowserRouter>
+      <ScrollToTop />
       {/* Persistent background. The video is skipped entirely — not just
           hidden — when reduced motion is requested, so it never downloads
           or plays. object-center keeps the portrait crop sensible on phones. */}
-      {reducedMotion ? (
+      {useStaticBackdrop ? (
         <div
           className="fixed inset-0 -z-10"
           style={{

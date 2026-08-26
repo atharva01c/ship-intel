@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
 import type { Shipment } from "../types/shipment";
-import { riskColor, priorityColor } from "../lib/shipmentColors";
+import { priorityColor } from "../lib/shipmentColors";
+import RiskBadge from "./RiskBadge";
 
 interface ShipmentCardProps {
   shipment: Shipment;
@@ -35,19 +36,7 @@ function ShipmentCard({ shipment, onDelete }: ShipmentCardProps) {
       )}
 
       <div className="mt-3 flex flex-wrap items-center gap-2">
-        <span
-          className="inline-flex items-center gap-1.5 rounded-full px-2 py-0.5 text-xs font-medium"
-          style={{
-            backgroundColor: `${riskColor[shipment.riskLevel]}20`,
-            color: riskColor[shipment.riskLevel],
-          }}
-        >
-          <span
-            className="h-1.5 w-1.5 rounded-full"
-            style={{ backgroundColor: riskColor[shipment.riskLevel] }}
-          />
-          {shipment.riskLevel}
-        </span>
+        <RiskBadge level={shipment.riskLevel} needsReview={shipment.needsReview} />
         <span
           className="text-xs font-medium"
           style={{ color: priorityColor[shipment.priority] }}

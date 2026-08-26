@@ -119,7 +119,7 @@ function ShipmentReviewPanel({ shipment, onReviewed }: ShipmentReviewPanelProps)
       </div>
 
       <form onSubmit={handleConfirm}>
-        <h3 className="mb-3 text-xs font-medium uppercase tracking-widest text-white/40">
+        <h3 className="mb-3 text-xs font-medium uppercase tracking-widest text-white/55">
           Verify Extracted Details
         </h3>
 
@@ -203,7 +203,7 @@ function ReviewField({
         onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder}
         inputMode={inputMode}
-        className="w-full rounded-2xl border border-white/10 bg-white/5 px-4 py-2.5 text-sm text-white placeholder-white/30 outline-none transition-colors focus:border-white/30 focus:ring-1 focus:ring-white/20"
+        className="w-full rounded-2xl border border-white/10 bg-white/5 px-4 py-2.5 text-sm text-white placeholder-white/40 outline-none transition-colors focus:border-white/30 focus:ring-1 focus:ring-white/20"
       />
     </label>
   );

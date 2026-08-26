@@ -21,9 +21,7 @@ const buildDefaultTimeline = () =>
     id: crypto.randomUUID(),
     label,
     status: index === 0 ? "completed" : "pending",
-    isCustom: false,
     timestamp: index === 0 ? new Date() : null,
-    notes: "",
   }));
 
 const shipmentSchema = new mongoose.Schema(
@@ -138,8 +136,7 @@ const shipmentSchema = new mongoose.Schema(
       },
     ],
 
-    // Progress milestones. Defaults are seeded on creation; users can add
-    // their own timepoints (isCustom: true).
+    // Progress milestones, seeded with defaults on creation.
     timeline: {
       type: [
         {
@@ -160,20 +157,10 @@ const shipmentSchema = new mongoose.Schema(
             default: "pending",
           },
 
-          isCustom: {
-            type: Boolean,
-            default: false,
-          },
-
           // When the event was created, or when it was marked completed.
           timestamp: {
             type: Date,
             default: null,
-          },
-
-          notes: {
-            type: String,
-            default: "",
           },
         },
       ],

@@ -1,4 +1,6 @@
-export interface ShipmentDetails {
+/** Shape of the extracted shipment fields. Internal to this module —
+    consumers read it via Shipment["shipmentDetails"]. */
+interface ShipmentDetails {
   origin: string | null;
   destination: string | null;
   cargoType: string | null;
@@ -19,10 +21,8 @@ export interface TimelineEvent {
   id: string;
   label: string;
   status: TimelineEventStatus;
-  /** Custom user-defined timepoints can be deleted; defaults cannot. */
-  isCustom: boolean;
+  /** When the event was created, or when it was marked completed. */
   timestamp: string | null;
-  notes: string;
 }
 
 export interface Shipment {

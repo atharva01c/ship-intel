@@ -84,14 +84,14 @@ function AnalyzeShipment() {
 
         {/* Input form */}
         {!shipment && (
-          <div className="mx-auto max-w-3xl">
+          <div className="animate-rise mx-auto max-w-3xl">
             {/* Narrower than the results bento — a lone textarea stretched
                 across the full content width reads badly. */}
             <form onSubmit={handleSubmit}>
               <div className="liquid-glass rounded-3xl p-5 sm:p-6 md:p-8">
                 <label
                   htmlFor="shipment-desc"
-                  className="mb-3 block text-xs font-medium uppercase tracking-widest text-white/40"
+                  className="mb-3 block text-xs font-medium uppercase tracking-widest text-white/55"
                 >
                   Shipment Description
                 </label>
@@ -101,7 +101,7 @@ function AnalyzeShipment() {
                   onChange={(e) => setDescription(e.target.value)}
                   placeholder="Describe your shipment… e.g. 'Fragile electronics from Shanghai to Rotterdam, 500kg, needs temperature control'"
                   rows={5}
-                  className="w-full resize-none rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-base text-white placeholder-white/30 outline-none transition-colors focus:border-white/30 focus:ring-1 focus:ring-white/20 sm:text-sm"
+                  className="w-full resize-none rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-base text-white placeholder-white/40 outline-none transition-colors focus:border-white/30 focus:ring-1 focus:ring-white/20 sm:text-sm"
                 />
 
                 {error && <p className="mt-3 text-sm text-red-400">{error}</p>}
@@ -109,7 +109,7 @@ function AnalyzeShipment() {
                 {/* Stacks on phones — the helper text and the button collide
                     when they share a row at narrow widths. */}
                 <div className="mt-4 flex flex-col-reverse gap-3 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
-                  <p className="text-xs text-white/30">
+                  <p className="text-xs text-white/50">
                     AI analyzes risk, alerts, and provides smart
                     recommendations.
                   </p>
@@ -138,8 +138,8 @@ function AnalyzeShipment() {
 
         {/* Results — same bento grid as the details page */}
         {shipment && (
-          <div className="mt-8">
-            <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+          <div className="animate-rise mt-8">
+            <div className="stagger grid grid-cols-1 gap-4 lg:grid-cols-2">
               {/* Low-confidence extraction: hold risk results until the user
                   verifies the extracted details. */}
               {shipment.needsReview && (

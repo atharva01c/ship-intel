@@ -79,19 +79,18 @@ function ShipmentChat({ shipmentId, initialMessages }: ShipmentChatProps) {
       {/* Message list */}
       {messages.length === 0 ? (
         <p className="mb-4 text-sm text-[var(--text)]">
-          Ask a follow-up question — e.g. "what if I reduce the weight to
-          300kg?" or "why is this high risk?"
+          Ask a follow-up question - e.g. &quot;why is this high risk?&quot;
         </p>
       ) : (
         <ul className="m-0 mb-4 grid max-h-96 list-none gap-3 overflow-y-auto p-0">
           {messages.map((message, index) => (
             <li
               key={index}
-              className={
+              className={`animate-rise ${
                 message.role === "user"
                   ? "ml-auto max-w-[85%] rounded-2xl rounded-br-md border border-white/15 bg-white/12 px-4 py-2.5 text-sm text-white"
                   : "mr-auto max-w-[85%] rounded-2xl rounded-bl-md border border-white/10 bg-black/20 px-4 py-2.5 text-sm text-[var(--text-h)]"
-              }
+              }`}
             >
               <p className="m-0 whitespace-pre-wrap break-words">
                 {message.content}
@@ -100,7 +99,7 @@ function ShipmentChat({ shipmentId, initialMessages }: ShipmentChatProps) {
           ))}
 
           {sending && (
-            <li className="mr-auto flex items-center gap-1.5 rounded-2xl rounded-bl-md border border-white/10 bg-black/20 px-4 py-3">
+            <li className="animate-rise mr-auto flex items-center gap-1.5 rounded-2xl rounded-bl-md border border-white/10 bg-black/20 px-4 py-3">
               {[0, 1, 2].map((dot) => (
                 <span
                   key={dot}
@@ -122,7 +121,7 @@ function ShipmentChat({ shipmentId, initialMessages }: ShipmentChatProps) {
           value={input}
           onChange={(e) => setInput(e.target.value)}
           placeholder="Ask a follow-up question…"
-          className="min-w-0 flex-1 rounded-full border border-white/10 bg-white/5 px-4 py-2.5 text-sm text-white placeholder-white/30 outline-none transition-colors focus:border-white/30 focus:ring-1 focus:ring-white/20"
+          className="min-w-0 flex-1 rounded-full border border-white/10 bg-white/5 px-4 py-2.5 text-sm text-white placeholder-white/40 outline-none transition-colors focus:border-white/30 focus:ring-1 focus:ring-white/20"
         />
         <button
           type="submit"
@@ -134,7 +133,7 @@ function ShipmentChat({ shipmentId, initialMessages }: ShipmentChatProps) {
         </button>
       </form>
 
-      <p className="mt-2.5 text-xs text-white/30">
+      <p className="mt-2.5 text-xs text-white/50">
         Answers are based only on this shipment's stored data.
       </p>
     </div>

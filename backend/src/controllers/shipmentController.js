@@ -1,6 +1,5 @@
 const Shipment = require("../models/shipmentModel");
-const { TIMELINE_STATUSES } = require("../models/shipmentModel");
-const crypto = require("crypto");
+const { TIMELINE_STATUSES } = Shipment;
 const mongoose = require("mongoose");
 const {
   analyzeShipment,
@@ -308,10 +307,7 @@ const MAX_CONTEXT_MESSAGES = 20;
 const buildShipmentContext = (shipment) => {
   const details = shipment.shipmentDetails;
   const timeline = (shipment.timeline || [])
-    .map(
-      (event) =>
-        `- ${event.label} [${event.status}]${event.notes ? ` (${event.notes})` : ""}`,
-    )
+    .map((event) => `- ${event.label} [${event.status}]`)
     .join("\n");
 
   return [
@@ -483,132 +479,6 @@ const updateTimelineEvent = async (req, res) => {
   }
 };
 
-// Add a user-defined timepoint to the timeline.
-const addTimelineEvent = async (req, res) => {
-  try {
-    const { id } = req.params;
-    const { label, notes } = req.body ?? {};
-
-    if (!mongoose.Types.ObjectId.isValid(id)) {
-      return res.status(400).json({
-        success: false,
-        message: "Invalid shipment ID",
-      });
-    }
-
-    if (!label || !label.trim()) {
-      return res.status(400).json({
-        success: false,
-        message: "Timeline label is required",
-      });
-    }
-
-    if (notes !== undefined && typeof notes !== "string") {
-      return res.status(400).json({
-        success: false,
-        message: "Notes must be a string",
-      });
-    }
-
-    const shipment = await Shipment.findById(id);
-    if (!shipment) {
-      return res.status(404).json({
-        success: false,
-        message: "No shipment with the given id found.",
-      });
-    }
-
-    const event = {
-      id: crypto.randomUUID(),
-      label: label.trim(),
-      status: "pending",
-      isCustom: true,
-      timestamp: new Date(),
-      notes: notes?.trim() || "",
-    };
-
-    const updated = await Shipment.findByIdAndUpdate(
-      id,
-      { $push: { timeline: event } },
-      { new: true, runValidators: true },
-    );
-
-    res.status(201).json({
-      success: true,
-      message: "Timeline event added",
-      shipment: updated,
-    });
-  } catch (error) {
-    console.error("Add timeline event error:", error.message);
-
-    res.status(500).json({
-      success: false,
-      message: "Failed to add timeline event",
-    });
-  }
-};
-
-// Remove a custom timepoint. Default milestones can never be deleted —
-// the guard lives in both the pre-check and the $pull condition itself.
-const deleteTimelineEvent = async (req, res) => {
-  try {
-    const { id, eventId } = req.params;
-
-    if (!mongoose.Types.ObjectId.isValid(id)) {
-      return res.status(400).json({
-        success: false,
-        message: "Invalid shipment ID",
-      });
-    }
-
-    const shipment = await Shipment.findById(id);
-    if (!shipment) {
-      return res.status(404).json({
-        success: false,
-        message: "No shipment with the given id found.",
-      });
-    }
-
-    const event = shipment.timeline.find((event) => event.id === eventId);
-
-    if (!event) {
-      return res.status(404).json({
-        success: false,
-        message: "No timeline event with the given id found.",
-      });
-    }
-
-    if (!event.isCustom) {
-      return res.status(400).json({
-        success: false,
-        message: "Default milestones cannot be deleted",
-      });
-    }
-
-    // The isCustom condition in $pull makes the delete safe even if the
-    // document changes between the check and this write.
-    await Shipment.updateOne(
-      { _id: id, "timeline.id": eventId },
-      { $pull: { timeline: { id: eventId, isCustom: true } } },
-    );
-
-    const updated = await Shipment.findById(id);
-
-    res.status(200).json({
-      success: true,
-      message: `Deleted timeline event: ${event.label}`,
-      shipment: updated,
-    });
-  } catch (error) {
-    console.error("Delete timeline event error:", error.message);
-
-    res.status(500).json({
-      success: false,
-      message: "Failed to delete timeline event",
-    });
-  }
-};
-
 module.exports = {
   createShipment,
   getShipmentById,
@@ -618,6 +488,4 @@ module.exports = {
   reviewShipment,
   askShipmentQuestion,
   updateTimelineEvent,
-  addTimelineEvent,
-  deleteTimelineEvent,
 };

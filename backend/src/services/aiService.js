@@ -84,12 +84,8 @@ const validateDescription = (description) => {
   return value;
 };
 
-// Bound the conversation history sent to the model so long chats don't
-// blow past the context window.
 const MAX_HISTORY_MESSAGES = 20;
 
-// Cap follow-up answers; they should be concise. Budget is generous
-// because reasoning models spend tokens thinking before answering.
 const QUESTION_MAX_TOKENS = 1200;
 
 const answerShipmentQuestion = async ({ question, history, shipmentContext }) => {
@@ -156,8 +152,6 @@ Rules:
   }
 };
 
-// Reasoning-style models emit chain-of-thought before the JSON payload,
-// so the budget must cover thinking plus the full extraction.
 const ANALYSIS_MAX_TOKENS = 2000;
 
 const extractJsonPayload = (content) => {

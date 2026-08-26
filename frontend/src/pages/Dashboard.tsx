@@ -5,8 +5,9 @@ import { Package, TrendingUp, Clock, ArrowUpRight } from "lucide-react";
 
 import { getShipments } from "../services/shipmentApi";
 import type { Shipment } from "../types/shipment";
-import { riskColor, priorityColor } from "../lib/shipmentColors";
+import { priorityColor } from "../lib/shipmentColors";
 import ShipmentCard from "../components/ShipmentCard";
+import RiskBadge from "../components/RiskBadge";
 
 function Dashboard() {
   const [shipments, setShipments] = useState<Shipment[]>([]);
@@ -37,10 +38,14 @@ function Dashboard() {
   const highRisk = shipments.filter(
     (s) => s.riskLevel === "High" || s.riskLevel === "Critical",
   ).length;
+  // Shipments held for review were never scored — averaging their default
+  // zeros would drag the number down and imply false precision.
+  const scoredShipments = shipments.filter((s) => !s.needsReview);
   const avgScore =
-    totalShipments > 0
+    scoredShipments.length > 0
       ? Math.round(
-          shipments.reduce((sum, s) => sum + s.riskScore, 0) / totalShipments,
+          scoredShipments.reduce((sum, s) => sum + s.riskScore, 0) /
+            scoredShipments.length,
         )
       : 0;
   const recentShipments = shipments.slice(0, 5);
@@ -57,7 +62,7 @@ function Dashboard() {
     <div>
       <main className="mx-auto max-w-6xl px-5 py-8 sm:px-6 sm:py-12">
         {/* Header */}
-        <div className="mb-8 sm:mb-12">
+        <div className="animate-rise mb-8 sm:mb-12">
           <h1 className="display display-page text-white">Dashboard</h1>
           <p className="mt-3 text-sm text-white/50 sm:mt-4 sm:text-base">
             Real-time overview of your shipment monitoring activity.
@@ -65,18 +70,21 @@ function Dashboard() {
         </div>
 
         {error && (
-          <div className="mb-6 rounded-2xl border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-400">
+          <div
+            role="alert"
+            className="animate-rise mb-6 rounded-2xl border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-400"
+          >
             {error}
           </div>
         )}
 
         {/* Bento grid */}
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+        <div className="stagger grid grid-cols-1 gap-4 md:grid-cols-3">
           {/* Stats row - spans full width */}
           <div className="liquid-glass rounded-3xl p-5 sm:p-6 md:col-span-2">
             <div className="mb-4 flex items-center gap-2">
               <Package className="h-5 w-5 text-white/60" />
-              <span className="text-xs font-medium uppercase tracking-widest text-white/40">
+              <span className="text-xs font-medium uppercase tracking-widest text-white/55">
                 Overview
               </span>
             </div>
@@ -99,7 +107,7 @@ function Dashboard() {
           <div className="liquid-glass group rounded-3xl p-5 sm:p-6">
             <div className="mb-4 flex items-center gap-2">
               <TrendingUp className="h-5 w-5 text-white/60" />
-              <span className="text-xs font-medium uppercase tracking-widest text-white/40">
+              <span className="text-xs font-medium uppercase tracking-widest text-white/55">
                 Quick Action
               </span>
             </div>
@@ -123,7 +131,7 @@ function Dashboard() {
             <div className="mb-5 flex items-center justify-between gap-3 sm:mb-6">
               <div className="flex min-w-0 items-center gap-2">
                 <Clock className="h-5 w-5 shrink-0 text-white/60" />
-                <span className="truncate text-xs font-medium uppercase tracking-widest text-white/40">
+                <span className="truncate text-xs font-medium uppercase tracking-widest text-white/55">
                   Recent Shipments
                 </span>
               </div>
@@ -136,7 +144,7 @@ function Dashboard() {
             </div>
 
             {recentShipments.length === 0 ? (
-              <p className="py-8 text-center text-sm text-white/40">
+              <p className="py-8 text-center text-sm text-white/50">
                 No shipments yet.{" "}
                 <Link
                   to="/analyze"
@@ -157,14 +165,17 @@ function Dashboard() {
                 {/* md and up: the full table. */}
                 <div className="hidden md:block">
                   <table className="w-full text-left text-sm">
+                    <caption className="sr-only">
+                      Five most recently analyzed shipments
+                    </caption>
                     <thead>
-                      <tr className="border-b border-white/10 text-white/40">
-                        <th className="pb-3 pr-4 font-medium">Route</th>
-                        <th className="pb-3 pr-4 font-medium">Cargo</th>
-                        <th className="pb-3 pr-4 font-medium">Weight</th>
-                        <th className="pb-3 pr-4 font-medium">Risk</th>
-                        <th className="pb-3 pr-4 font-medium">Priority</th>
-                        <th className="pb-3 font-medium">Action</th>
+                      <tr className="border-b border-white/10 text-white/55">
+                        <th scope="col" className="pb-3 pr-4 font-medium">Route</th>
+                        <th scope="col" className="pb-3 pr-4 font-medium">Cargo</th>
+                        <th scope="col" className="pb-3 pr-4 font-medium">Weight</th>
+                        <th scope="col" className="pb-3 pr-4 font-medium">Risk</th>
+                        <th scope="col" className="pb-3 pr-4 font-medium">Priority</th>
+                        <th scope="col" className="pb-3 font-medium">Action</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -186,21 +197,10 @@ function Dashboard() {
                               {weight !== null ? `${weight} kg` : "—"}
                             </td>
                             <td className="py-3 pr-4">
-                              <span
-                                className="inline-flex items-center gap-1.5 rounded-full px-2 py-0.5 text-xs font-medium"
-                                style={{
-                                  backgroundColor: `${riskColor[s.riskLevel]}20`,
-                                  color: riskColor[s.riskLevel],
-                                }}
-                              >
-                                <span
-                                  className="h-1.5 w-1.5 rounded-full"
-                                  style={{
-                                    backgroundColor: riskColor[s.riskLevel],
-                                  }}
-                                />
-                                {s.riskLevel}
-                              </span>
+                              <RiskBadge
+                                level={s.riskLevel}
+                                needsReview={s.needsReview}
+                              />
                             </td>
                             <td className="py-3 pr-4">
                               <span
@@ -244,7 +244,7 @@ function StatBlock({
 }) {
   return (
     <div>
-      <p className="text-[11px] font-medium uppercase tracking-widest text-white/40 sm:text-xs">
+      <p className="text-[11px] font-medium uppercase tracking-widest text-white/55 sm:text-xs">
         {label}
       </p>
       <p

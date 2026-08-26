@@ -66,14 +66,6 @@ function ShipmentDetails() {
     }
   };
 
-  const handleReviewed = (updated: Shipment) => {
-    setShipment(updated);
-  };
-
-  const handleTimelineChange = (updated: Shipment) => {
-    setShipment(updated);
-  };
-
   if (loading) {
     return (
       <div className="viewport-fit flex items-center justify-center px-5">
@@ -124,7 +116,7 @@ function ShipmentDetails() {
     <div>
       <main className="mx-auto max-w-6xl px-5 py-8 sm:px-6 sm:py-12">
         {/* Header */}
-        <div className="mb-8 flex flex-col gap-5 sm:mb-12 sm:flex-row sm:items-end sm:justify-between sm:gap-6">
+        <div className="animate-rise mb-8 flex flex-col gap-5 sm:mb-12 sm:flex-row sm:items-end sm:justify-between sm:gap-6">
           <div className="min-w-0">
             <Link
               to="/shipments"
@@ -137,7 +129,7 @@ function ShipmentDetails() {
             </h1>
             {/* break-all: a 24-char ObjectId has no break opportunities and
                 will otherwise push the layout wider than the screen. */}
-            <p className="mt-2 break-all text-xs text-white/40 sm:text-sm">
+            <p className="mt-2 break-all text-xs text-white/55 sm:text-sm">
               Shipment ID: {shipment._id}
             </p>
           </div>
@@ -151,12 +143,12 @@ function ShipmentDetails() {
 
         {/* Bento grid — pairs up at lg, where the label/value rows have
             enough width to read as two columns. */}
-        <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+        <div className="stagger grid grid-cols-1 gap-4 lg:grid-cols-2">
           {shipment.needsReview && (
             <div className="lg:col-span-2">
               <ShipmentReviewPanel
                 shipment={shipment}
-                onReviewed={handleReviewed}
+                onReviewed={setShipment}
               />
             </div>
           )}
@@ -183,30 +175,33 @@ function ShipmentDetails() {
           </div>
         </div>
 
-        {/* Follow-up Q&A, scoped to this shipment */}
-        <div className="liquid-glass mt-4 rounded-3xl p-5 sm:p-6">
-          <ShipmentChat
-            shipmentId={shipment._id}
-            initialMessages={shipment.messages ?? []}
-          />
-        </div>
+        {/* Below the bento: each block rises in sequence */}
+        <div className="stagger">
+          {/* Follow-up Q&A, scoped to this shipment */}
+          <div className="liquid-glass mt-4 rounded-3xl p-5 sm:p-6">
+            <ShipmentChat
+              shipmentId={shipment._id}
+              initialMessages={shipment.messages ?? []}
+            />
+          </div>
 
-        {/* Progress timeline */}
-        <div className="liquid-glass mt-4 rounded-3xl p-5 sm:p-6">
-          <ShipmentTimeline
-            shipment={shipment}
-            onShipmentChange={handleTimelineChange}
-          />
-        </div>
+          {/* Progress timeline */}
+          <div className="liquid-glass mt-4 rounded-3xl p-5 sm:p-6">
+            <ShipmentTimeline
+              shipment={shipment}
+              onShipmentChange={setShipment}
+            />
+          </div>
 
-        {/* Original description */}
-        <div className="liquid-glass mt-4 rounded-3xl p-5 sm:p-6">
-          <h2 className="mb-3 text-xs font-medium uppercase tracking-widest text-white/40">
-            Original Description
-          </h2>
-          <p className="text-sm leading-relaxed text-white/70">
-            {shipment.originalDescription}
-          </p>
+          {/* Original description */}
+          <div className="liquid-glass mt-4 rounded-3xl p-5 sm:p-6">
+            <h2 className="mb-3 text-xs font-medium uppercase tracking-widest text-white/55">
+              Original Description
+            </h2>
+            <p className="text-sm leading-relaxed text-white/70">
+              {shipment.originalDescription}
+            </p>
+          </div>
         </div>
       </main>
     </div>

@@ -72,41 +72,16 @@ export const askShipmentQuestion = async (
   return response.data;
 };
 
-const shipmentFromResponse = (data: { shipment: Shipment }) => data.shipment;
-
 export const updateTimelineEventStatus = async (
   id: string,
   eventId: string,
   status: TimelineEventStatus,
 ): Promise<Shipment> => {
-  const response = await axios.patch(
-    `${API_URL}/shipments/${id}/timeline/${eventId}`,
-    { status },
-  );
+  const response = await axios.patch<{
+    success: boolean;
+    message: string;
+    shipment: Shipment;
+  }>(`${API_URL}/shipments/${id}/timeline/${eventId}`, { status });
 
-  return shipmentFromResponse(response.data);
-};
-
-export const addTimelineEvent = async (
-  id: string,
-  label: string,
-  notes?: string,
-): Promise<Shipment> => {
-  const response = await axios.post(`${API_URL}/shipments/${id}/timeline`, {
-    label,
-    ...(notes ? { notes } : {}),
-  });
-
-  return shipmentFromResponse(response.data);
-};
-
-export const deleteTimelineEvent = async (
-  id: string,
-  eventId: string,
-): Promise<Shipment> => {
-  const response = await axios.delete(
-    `${API_URL}/shipments/${id}/timeline/${eventId}`,
-  );
-
-  return shipmentFromResponse(response.data);
+  return response.data.shipment;
 };

@@ -4,8 +4,9 @@ import axios from "axios";
 
 import { getShipments, deleteShipment } from "../services/shipmentApi";
 import type { Shipment } from "../types/shipment";
-import { riskColor, priorityColor } from "../lib/shipmentColors";
+import { priorityColor } from "../lib/shipmentColors";
 import ShipmentCard from "../components/ShipmentCard";
+import RiskBadge from "../components/RiskBadge";
 
 function ShipmentHistory() {
   const [shipments, setShipments] = useState<Shipment[]>([]);
@@ -69,14 +70,17 @@ function ShipmentHistory() {
         </div>
 
         {error && (
-          <div className="mb-6 rounded-2xl border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-400">
+          <div
+            role="alert"
+            className="animate-rise mb-6 rounded-2xl border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-400"
+          >
             {error}
           </div>
         )}
 
         {shipments.length === 0 ? (
-          <div className="liquid-glass rounded-3xl px-6 py-12 text-center sm:p-12">
-            <p className="text-base text-white/60 sm:text-lg">
+          <div className="animate-rise liquid-glass rounded-3xl px-6 py-12 text-center sm:p-12">
+            <p className="text-base text-white/50 sm:text-lg">
               No shipments yet.
             </p>
             <Link
@@ -89,7 +93,7 @@ function ShipmentHistory() {
         ) : (
           /* One glass panel at every width — cards inside it on phones,
              the full table from md up. */
-          <div className="liquid-glass rounded-3xl p-4 sm:p-6">
+          <div className="animate-rise liquid-glass rounded-3xl p-4 sm:p-6">
             {/* Phones: stacked cards, every column intact, no sideways scroll. */}
             <ul className="grid list-none gap-3 p-0 md:hidden">
               {shipments.map((s) => (
@@ -104,14 +108,18 @@ function ShipmentHistory() {
             {/* md and up: the full table. */}
             <div className="hidden md:block">
               <table className="w-full text-left text-sm">
+                <caption className="sr-only">
+                  All analyzed shipments with route, cargo, weight, risk and
+                  priority
+                </caption>
                 <thead>
-                  <tr className="border-b border-white/10 text-white/40">
-                    <th className="pb-3 pr-4 font-medium">Route</th>
-                    <th className="pb-3 pr-4 font-medium">Cargo</th>
-                    <th className="pb-3 pr-4 font-medium">Weight</th>
-                    <th className="pb-3 pr-4 font-medium">Risk</th>
-                    <th className="pb-3 pr-4 font-medium">Priority</th>
-                    <th className="pb-3 font-medium">Actions</th>
+                  <tr className="border-b border-white/10 text-white/55">
+                    <th scope="col" className="pb-3 pr-4 font-medium">Route</th>
+                    <th scope="col" className="pb-3 pr-4 font-medium">Cargo</th>
+                    <th scope="col" className="pb-3 pr-4 font-medium">Weight</th>
+                    <th scope="col" className="pb-3 pr-4 font-medium">Risk</th>
+                    <th scope="col" className="pb-3 pr-4 font-medium">Priority</th>
+                    <th scope="col" className="pb-3 font-medium">Actions</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -133,21 +141,10 @@ function ShipmentHistory() {
                           {weight !== null ? `${weight} kg` : "—"}
                         </td>
                         <td className="py-4 pr-4">
-                          <span
-                            className="inline-flex items-center gap-1.5 rounded-full px-2 py-0.5 text-xs font-medium"
-                            style={{
-                              backgroundColor: `${riskColor[s.riskLevel]}20`,
-                              color: riskColor[s.riskLevel],
-                            }}
-                          >
-                            <span
-                              className="h-1.5 w-1.5 rounded-full"
-                              style={{
-                                backgroundColor: riskColor[s.riskLevel],
-                              }}
-                            />
-                            {s.riskLevel}
-                          </span>
+                          <RiskBadge
+                            level={s.riskLevel}
+                            needsReview={s.needsReview}
+                          />
                         </td>
                         <td className="py-4 pr-4">
                           <span
@@ -167,7 +164,7 @@ function ShipmentHistory() {
                             </Link>
                             <button
                               onClick={() => handleDelete(s._id)}
-                              className="text-sm text-red-400/60 transition-colors hover:text-red-400"
+                              className="text-sm text-red-400/80 transition-colors hover:text-red-400"
                             >
                               Delete
                             </button>

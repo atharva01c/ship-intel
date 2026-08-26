@@ -16,7 +16,7 @@ function Landing() {
   };
 
   return (
-    <div className="viewport-fit flex flex-col items-center justify-center px-5 py-10 text-center sm:px-6">
+    <div className="viewport-fit stagger flex flex-col items-center justify-center px-5 py-10 text-center sm:px-6">
       {/* Hero content — a fixed 16ch measure holds the headline as a
           three-line typeset block at every width instead of reflowing. */}
       <h1 className="display display-hero max-w-[16ch] text-white">
@@ -30,7 +30,7 @@ function Landing() {
             type="text"
             value={description}
             onChange={(e) => setDescription(e.target.value)}
-            placeholder="Describe your shipment..."
+            placeholder="Describe your shipment…"
             aria-label="Shipment description"
             className="min-w-0 flex-1 bg-transparent text-base text-white outline-none placeholder:text-white/40 sm:text-sm"
           />
