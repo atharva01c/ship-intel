@@ -12,10 +12,7 @@ const DEFAULT_MILESTONES = [
   "Delivered",
 ];
 
-// Factory (not a literal) so every new document gets its own event objects
-// with fresh ids instead of sharing references across documents. All
-// milestones start pending except the first, which is completed at
-// creation time.
+
 const buildDefaultTimeline = () =>
   DEFAULT_MILESTONES.map((label, index) => ({
     id: crypto.randomUUID(),
